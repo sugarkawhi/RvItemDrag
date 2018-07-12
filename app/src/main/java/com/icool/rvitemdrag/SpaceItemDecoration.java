@@ -11,28 +11,35 @@ import android.view.View;
  */
 public class SpaceItemDecoration extends RecyclerView.ItemDecoration {
 
-    private int itemSpace;
-    private int itemNum;
+    private int spanCount;
+    private int spacing;
+    private boolean includeEdge;
 
-    /**
-     * @param itemSpace item间隔
-     * @param itemNum   每行item的个数
-     */
-    public SpaceItemDecoration(int itemSpace, int itemNum) {
-        this.itemSpace = itemSpace;
-        this.itemNum = itemNum;
+    public SpaceItemDecoration(int spanCount, int spacing, boolean includeEdge) {
+        this.spanCount = spanCount;
+        this.spacing = spacing;
+        this.includeEdge = includeEdge;
     }
 
     @Override
     public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
-        super.getItemOffsets(outRect, view, parent, state);
-        outRect.bottom = itemSpace;
-        if (parent.getChildLayoutPosition(view) % itemNum == 0) {  //parent.getChildLayoutPosition(view) 获取view的下标
-            outRect.left = 0;
+        int position = parent.getChildAdapterPosition(view); // item position
+        int column = position % spanCount; // item column
+
+        if (includeEdge) {
+            outRect.left = spacing - column * spacing / spanCount; // spacing - column * ((1f / spanCount) * spacing)
+            outRect.right = (column + 1) * spacing / spanCount; // (column + 1) * ((1f / spanCount) * spacing)
+
+            if (position < spanCount) { // top edge
+                outRect.top = spacing;
+            }
+            outRect.bottom = spacing; // item bottom
         } else {
-            outRect.left = itemSpace;
+            outRect.left = column * spacing / spanCount; // column * ((1f / spanCount) * spacing)
+            outRect.right = spacing - (column + 1) * spacing / spanCount; // spacing - (column + 1) * ((1f /    spanCount) * spacing)
+            if (position >= spanCount) {
+                outRect.top = spacing; // item top
+            }
         }
-
     }
-
 }

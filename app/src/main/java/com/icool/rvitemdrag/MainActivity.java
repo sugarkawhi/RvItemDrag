@@ -14,69 +14,92 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    RecyclerView mRv1;
-    ImageView mIvTarget;
-    ICoolAdapter mICoolAdapter;
-    List<String> mData;
+    RecyclerView mRv1, mRv2;
+    List<String> mTopData;
+    List<String> mBottomData;
+
+    private ItemTouchHelper mItemTouchHelper;
+    private ICoolTopAdapter mTopAdapter;
+    private ICoolBottomAdapter mBottomAdapter;
+    private ICoolTopAdapter.OnItemClickListener mTopItemListener = new ICoolTopAdapter.OnItemClickListener() {
+        @Override
+        public void onLongClick(ICoolTopAdapter.ICoolTopHolder holder) {
+            int position = holder.getAdapterPosition();
+            if (position == 0 || position == 1) return;
+            mItemTouchHelper.startDrag(holder);
+        }
+
+        @Override
+        public void onClick(ICoolTopAdapter.ICoolTopHolder holder) {
+
+        }
+
+        @Override
+        public void onDeleteClick(ICoolTopAdapter.ICoolTopHolder holder) {
+            View view = holder.itemView;
+            if (view == null) return;
+            float x = view.getX();
+            float y = view.getY();
+            Toast.makeText(MainActivity.this, "x=" + x + " y=" + y, Toast.LENGTH_SHORT).show();
+            startXAnim(view);
+        }
+    };
+
+    private ICoolBottomAdapter.OnItemClickListener mBottomItemClickListener = new ICoolBottomAdapter.OnItemClickListener() {
+        @Override
+        public void onClick(ICoolBottomAdapter.ICoolBottomHolder holder) {
+
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mRv1 = findViewById(R.id.rv);
-        mIvTarget = findViewById(R.id.iv_target);
+        mRv2 = findViewById(R.id.rv2);
         init();
-        mRv1.setLayoutManager(new GridLayoutManager(this, 4));
-        mRv1.addItemDecoration(new SpaceItemDecoration(20, 4));
-        ICoolItemTouchHelperCallback callback = new ICoolItemTouchHelperCallback<>(mData);
-        final ItemTouchHelper helper = new ItemTouchHelper(callback);
-        ICoolAdapter.OnItemClickListener itemClickListener = new ICoolAdapter.OnItemClickListener() {
-            @Override
-            public void onLongClick(int position, ICoolAdapter.ICoolHolder holder) {
-                if (position == 0 || position == 1) return;
-                helper.startDrag(holder);
-            }
-
-            @Override
-            public void onClick(int position) {
-
-            }
-
-            @Override
-            public void onDeleteClick(int position, ICoolAdapter.ICoolHolder holder) {
-                View view = holder.itemView;
-                if (view == null) return;
-                float x = view.getX();
-                float y = view.getY();
-                Toast.makeText(MainActivity.this, "x=" + x + " y=" + y, Toast.LENGTH_SHORT).show();
-                startXAnim(view);
-            }
-        };
-        mICoolAdapter = new ICoolAdapter(this, itemClickListener, mData);
-        mRv1.setAdapter(mICoolAdapter);
-
-        helper.attachToRecyclerView(mRv1);
     }
 
     private void init() {
-        mData = new ArrayList<>();
-        mData.add("推荐");
-        mData.add("图片");
-        mData.add("搞笑");
-        mData.add("科技");
-        mData.add("汽车");
-        mData.add("咨询");
-        mData.add("育婴");
-        mData.add("篮球");
-        mData.add("体育");
-        mData.add("世界杯");
-        mData.add("国家");
-        mData.add("政治");
-        mData.add("考试");
-        mData.add("民生");
-        mData.add("政策");
-        mData.add("作家");
-        mData.add("艺术");
+        mTopData = new ArrayList<>();
+        mTopData.add("推荐");
+        mTopData.add("图片");
+        mTopData.add("搞笑");
+        mTopData.add("科技");
+        mTopData.add("汽车");
+        mTopData.add("咨询");
+        mTopData.add("育婴");
+        mTopData.add("篮球");
+        mTopData.add("体育");
+        mTopData.add("世界杯");
+        mTopData.add("国家");
+        mTopData.add("政治");
+        mTopData.add("考试");
+        mTopData.add("民生");
+        mTopData.add("政策");
+        mTopData.add("作家");
+        mTopData.add("艺术");
+
+        mBottomData = new ArrayList<>();
+        mBottomData.add("历史");
+        mTopData.add("健康");
+        mBottomData.add("家具");
+        mBottomData.add("漫画");
+        mBottomData.add("数码");
+        mBottomData.add("教育");
+
+        mRv1.setLayoutManager(new GridLayoutManager(this, 4));
+        mRv2.setLayoutManager(new GridLayoutManager(this, 4));
+        mRv1.addItemDecoration(new SpaceItemDecoration(4,30,false));
+        mRv2.addItemDecoration(new SpaceItemDecoration(4,30,false));
+        ICoolItemTouchHelperCallback callback = new ICoolItemTouchHelperCallback<>(mTopData);
+        mItemTouchHelper = new ItemTouchHelper(callback);
+        mItemTouchHelper.attachToRecyclerView(mRv1);
+        mTopAdapter = new ICoolTopAdapter(this, mTopData, mTopItemListener);
+        mRv1.setAdapter(mTopAdapter);
+        mBottomAdapter = new ICoolBottomAdapter(this, mBottomData, mBottomItemClickListener);
+        mRv2.setAdapter(mBottomAdapter);
     }
 
     /**
@@ -84,11 +107,11 @@ public class MainActivity extends AppCompatActivity {
      */
     private void startXAnim(View view) {
 
-        view.animate()
-                .translationXBy(mIvTarget.getX() - view.getX())
-                .translationYBy(mIvTarget.getY() - view.getY())
-                .setDuration(800)
-                .start();
+//        view.animate()
+//                .translationXBy(mIvTarget.getX() - view.getX())
+//                .translationYBy(mIvTarget.getY() - view.getY())
+//                .setDuration(800)
+//                .start();
 
     }
 }

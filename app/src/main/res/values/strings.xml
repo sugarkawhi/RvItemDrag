@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">RvItemDrag</string>
+    <string name="top">我的栏目</string>
+    <string name="bottom">更多栏目</string>
 </resources>
