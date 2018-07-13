@@ -30,7 +30,8 @@
             android:layout_height="wrap_content"
             android:clipChildren="false"
             android:clipToPadding="false"
-            android:overScrollMode="never" />
+            android:overScrollMode="never"
+            android:paddingStart="@dimen/item_space_catalog" />
     </LinearLayout>
 
     <LinearLayout
@@ -53,7 +54,8 @@
             android:layout_height="wrap_content"
             android:clipChildren="false"
             android:clipToPadding="false"
-            android:overScrollMode="never" />
+            android:overScrollMode="never"
+            android:paddingStart="@dimen/item_space_catalog" />
     </LinearLayout>
 
 

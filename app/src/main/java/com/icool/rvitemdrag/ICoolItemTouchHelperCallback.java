@@ -17,9 +17,11 @@ public class ICoolItemTouchHelperCallback<T> extends ItemTouchHelper.Callback {
     private static final String TAG = "ItemTouchHelper";
 
     private List<T> mData;
+    private RecyclerView.Adapter mAdapter;
 
-    public ICoolItemTouchHelperCallback(List<T> data) {
+    public ICoolItemTouchHelperCallback(List<T> data, RecyclerView.Adapter adapter) {
         mData = data;
+        mAdapter = adapter;
     }
 
     @Override
@@ -46,8 +48,6 @@ public class ICoolItemTouchHelperCallback<T> extends ItemTouchHelper.Callback {
         if (targetPosition == 0 || targetPosition == 1) {
             return false;
         }
-
-        RecyclerView.Adapter adapter = recyclerView.getAdapter();
         if (fromPosition < targetPosition) {
             for (int i = fromPosition; i < targetPosition; i++) {
                 Collections.swap(mData, i, i + 1);
@@ -57,8 +57,7 @@ public class ICoolItemTouchHelperCallback<T> extends ItemTouchHelper.Callback {
                 Collections.swap(mData, i, i - 1);
             }
         }
-        adapter.notifyItemMoved(fromPosition, targetPosition);
-
+        mAdapter.notifyItemMoved(fromPosition, targetPosition);
         return true;
     }
 

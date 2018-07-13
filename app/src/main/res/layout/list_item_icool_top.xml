@@ -17,8 +17,8 @@
             android:background="@drawable/abc_bg_catalog"
             android:gravity="center"
             android:maxLines="1"
-            android:textSize="12sp"
             android:textColor="#6F6F6F"
+            android:textSize="12sp"
             tools:text="推荐" />
 
         <ImageView
@@ -26,8 +26,9 @@
             android:layout_width="20dp"
             android:layout_height="20dp"
             android:layout_alignParentEnd="true"
-            android:layout_marginEnd="-5dp"
-            android:layout_marginTop="-5dp"
+            android:layout_marginEnd="-3dp"
+            android:layout_marginTop="-3dp"
+            android:scaleType="centerInside"
             android:src="@mipmap/ic_delete" />
 
     </RelativeLayout>

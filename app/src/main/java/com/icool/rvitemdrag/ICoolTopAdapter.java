@@ -1,6 +1,7 @@
 package com.icool.rvitemdrag;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -41,10 +42,17 @@ public class ICoolTopAdapter extends RecyclerView.Adapter<ICoolTopAdapter.ICoolT
     @Override
     public void onBindViewHolder(@NonNull final ICoolTopHolder holder, final int position) {
         holder.mTextView.setText(mData.get(position));
+        if (position == 0 || position == 1) {
+            holder.mTextView.setBackgroundColor(Color.WHITE);
+            holder.mIvDelete.setVisibility(View.GONE);
+        } else {
+            holder.mTextView.setBackgroundResource(R.drawable.abc_bg_catalog);
+            holder.mIvDelete.setVisibility(View.VISIBLE);
+        }
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(mContext, mData.get(holder.getAdapterPosition()), Toast.LENGTH_SHORT).show();
+                mItemClickListener.onClick(holder);
             }
         });
         holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
@@ -76,6 +84,10 @@ public class ICoolTopAdapter extends RecyclerView.Adapter<ICoolTopAdapter.ICoolT
             mTextView = itemView.findViewById(R.id.tv);
             mIvDelete = itemView.findViewById(R.id.iv_delete);
         }
+    }
+
+    public List<String> getData() {
+        return mData;
     }
 
     public interface OnItemClickListener {
