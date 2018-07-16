@@ -15,13 +15,11 @@ import java.util.List;
  */
 public class ICoolRemoveAnimatorListener implements Animator.AnimatorListener {
 
-    private View mView;
     private ICoolTopAdapter mICoolTopAdapter;
     private ICoolBottomAdapter mICoolBottomAdapter;
     private int mPosition;
 
-    public ICoolRemoveAnimatorListener(View view, ICoolTopAdapter topAdapter, ICoolBottomAdapter bottomAdapter, int position) {
-        mView = view;
+    public ICoolRemoveAnimatorListener( ICoolTopAdapter topAdapter, ICoolBottomAdapter bottomAdapter, int position) {
         mICoolTopAdapter = topAdapter;
         mICoolBottomAdapter = bottomAdapter;
         mPosition = position;
@@ -35,14 +33,8 @@ public class ICoolRemoveAnimatorListener implements Animator.AnimatorListener {
     @Override
     public void onAnimationEnd(Animator animation) {
         mICoolBottomAdapter.notifyDataSetChanged();
-        mView.setVisibility(View.GONE);
-        List<String> data = mICoolTopAdapter.getData();
-//        for (int i = mPosition; i < data.size() - 1; i++) {
-//            Collections.swap(data, i, i + 1);
-//        }
-//        mICoolTopAdapter.notifyItemMoved(mPosition, data.size() - 1);
-        data.remove(data.size() - 1);
-        mICoolTopAdapter.notifyDataSetChanged();
+//        mICoolTopAdapter.getData().remove(mPosition);
+//        mICoolTopAdapter.notifyItemRemoved(mPosition);
     }
 
     @Override

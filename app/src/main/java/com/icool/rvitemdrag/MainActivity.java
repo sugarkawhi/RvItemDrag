@@ -8,6 +8,8 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.View;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 
 import com.icool.rvitemdrag.listener.ICoolRemoveAnimatorListener;
 import com.icool.rvitemdrag.utils.ToastUtils;
@@ -114,10 +116,11 @@ public class MainActivity extends AppCompatActivity {
      * 开启平移动画
      */
     private void startRemoveAnim(View fromView, int position) {
-        mBottomData.add(mTopData.get(position));
-
         if (mRv2.getChildCount() == 0) {
+            mBottomData.add(mTopData.get(position));
             mBottomAdapter.notifyDataSetChanged();
+            mTopData.remove(position);
+            mTopAdapter.notifyItemRemoved(position);
             return;
         }
         int index = mRv2.getChildCount() - 1;
@@ -133,6 +136,14 @@ public class MainActivity extends AppCompatActivity {
         float toX = tOutLocation[0];
         float toY = tOutLocation[1];
 
+        ImageView imageView = new ImageView(this);
+        imageView.setImageDrawable(fromView.getBackground());
+
+        FrameLayout frameLayout = findViewById(android.R.id.content);
+        frameLayout.addView(imageView);
+        FrameLayout.LayoutParams p = (FrameLayout.LayoutParams) imageView.getLayoutParams();
+        p.width = fromView.getBackground().getMinimumWidth();
+
         if ((index + 1) % SPAN_COUNT == 0) {
             // 下一行第一个
             toY = toY + mItemSpace + toView.getMeasuredHeight();
@@ -146,9 +157,13 @@ public class MainActivity extends AppCompatActivity {
                 .translationXBy(toX - fromX)
                 .translationYBy(toY - fromY)
                 .setDuration(200)
-                .setListener(new ICoolRemoveAnimatorListener(fromView, mTopAdapter, mBottomAdapter, position))
+                .setListener(new ICoolRemoveAnimatorListener(mTopAdapter, mBottomAdapter, position))
+                .withLayer()
                 .start();
 
+        mBottomData.add(mTopData.get(position));
+        mTopData.remove(position);
+        mTopAdapter.notifyItemRemoved(position);
     }
 
 
