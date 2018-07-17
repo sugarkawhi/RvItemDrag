@@ -1,17 +1,31 @@
 package com.icool.rvitemdrag;
 
 import android.animation.Animator;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.PixelFormat;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewParent;
+import android.view.WindowManager;
+import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.icool.rvitemdrag.listener.ICoolRemoveAnimatorListener;
+import com.icool.rvitemdrag.utils.ScreenUtils;
 import com.icool.rvitemdrag.utils.ToastUtils;
 
 import java.util.ArrayList;
@@ -42,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
         public void onClick(ICoolTopAdapter.ICoolTopHolder holder) {
             View view = holder.itemView;
             if (view == null) return;
+            view.setVisibility(View.GONE);
             int position = holder.getAdapterPosition();
             ToastUtils.show(mTopData.get(position));
             startRemoveAnim(view, position);
@@ -90,16 +105,15 @@ public class MainActivity extends AppCompatActivity {
         mTopData.add("艺术");
 
         mBottomData = new ArrayList<>();
-//        mBottomData.add("历史");
-//        mBottomData.add("健康");
-//        mBottomData.add("家具");
-//        mBottomData.add("漫画");
-//        mBottomData.add("数码");
-//        mBottomData.add("教育");
+        mBottomData.add("漫画");
+        mBottomData.add("数码");
+        mBottomData.add("教育");
 
         mRv1.setHasFixedSize(true);
-        mRv1.setLayoutManager(new GridLayoutManager(this, SPAN_COUNT));
-        mRv2.setLayoutManager(new GridLayoutManager(this, SPAN_COUNT));
+        GridLayoutManager g1 = new GridLayoutManager(this, SPAN_COUNT);
+        mRv1.setLayoutManager(g1);
+        GridLayoutManager g2 = new GridLayoutManager(this, SPAN_COUNT);
+        mRv2.setLayoutManager(g2);
         mItemSpace = (int) getResources().getDimension(R.dimen.item_space_catalog);
         mRv1.addItemDecoration(new SpaceItemDecoration(mItemSpace));
         mRv2.addItemDecoration(new SpaceItemDecoration(mItemSpace));
@@ -120,7 +134,9 @@ public class MainActivity extends AppCompatActivity {
             mBottomData.add(mTopData.get(position));
             mBottomAdapter.notifyDataSetChanged();
             mTopData.remove(position);
+            fromView.setVisibility(View.VISIBLE);
             mTopAdapter.notifyItemRemoved(position);
+            mTopAdapter.notifyItemRangeChanged(position, mTopAdapter.getData().size());
             return;
         }
         int index = mRv2.getChildCount() - 1;
@@ -136,13 +152,6 @@ public class MainActivity extends AppCompatActivity {
         float toX = tOutLocation[0];
         float toY = tOutLocation[1];
 
-        ImageView imageView = new ImageView(this);
-        imageView.setImageDrawable(fromView.getBackground());
-
-        FrameLayout frameLayout = findViewById(android.R.id.content);
-        frameLayout.addView(imageView);
-        FrameLayout.LayoutParams p = (FrameLayout.LayoutParams) imageView.getLayoutParams();
-        p.width = fromView.getBackground().getMinimumWidth();
 
         if ((index + 1) % SPAN_COUNT == 0) {
             // 下一行第一个
@@ -153,18 +162,64 @@ public class MainActivity extends AppCompatActivity {
             toX = toX + mItemSpace + toView.getMeasuredWidth();
         }
 
-        fromView.animate()
+
+        WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+        //初始化后不首先获得窗口焦点。不妨碍设备上其他部件的点击、触摸事件。
+        lp.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
+        WindowManager wm = getWindowManager();
+        // 设置窗口类型，一共有三种Application windows, Sub-windows, System windows
+        // API中以TYPE_开头的常量有23个
+        lp.type = WindowManager.LayoutParams.TYPE_APPLICATION_PANEL;
+        // 设置期望的bitmap格式
+        lp.format = PixelFormat.TRANSLUCENT;
+        lp.gravity = Gravity.START | Gravity.TOP;
+        final FrameLayout frameLayout = new FrameLayout(this);
+        wm.addView(frameLayout, lp);
+        fromView.setDrawingCacheEnabled(true);
+        final ImageView imageView = new ImageView(this);
+        frameLayout.addView(imageView);
+        imageView.setImageBitmap(getDrawingCache(fromView));
+        FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) imageView.getLayoutParams();
+        layoutParams.width = fromView.getMeasuredWidth();
+        layoutParams.height = fromView.getMeasuredHeight();
+        imageView.setLayoutParams(layoutParams);
+        imageView.setX(fromX);
+        imageView.setY(fromY);
+        imageView.bringToFront();
+
+        imageView.animate()
                 .translationXBy(toX - fromX)
                 .translationYBy(toY - fromY)
-                .setDuration(200)
-                .setListener(new ICoolRemoveAnimatorListener(mTopAdapter, mBottomAdapter, position))
-                .withLayer()
+                .setInterpolator(new LinearInterpolator())
+                .setDuration(500)
+                .setListener(new ICoolRemoveAnimatorListener(mTopAdapter, mBottomAdapter, position) {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        frameLayout.setVisibility(View.GONE);
+                        getWindowManager().removeView(frameLayout);
+                        super.onAnimationEnd(animation);
+                    }
+                })
                 .start();
-
         mBottomData.add(mTopData.get(position));
+        fromView.setVisibility(View.VISIBLE);
         mTopData.remove(position);
         mTopAdapter.notifyItemRemoved(position);
+        mTopAdapter.notifyItemRangeChanged(position, mTopAdapter.getData().size());
     }
 
+
+    private Bitmap getDrawingCache(View view) {
+        Bitmap bitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas c = new Canvas(bitmap);//使用bitmap构建一个Canvas，绘制的所有内容都是绘制在此Bitmap上的
+        Drawable bgDrawable = view.getBackground();
+        if (bgDrawable == null) {
+            c.drawColor(Color.TRANSPARENT);
+        } else {
+            bgDrawable.draw(c);//绘制背景
+        }
+        view.draw(c);//绘制前景
+        return bitmap;
+    }
 
 }
